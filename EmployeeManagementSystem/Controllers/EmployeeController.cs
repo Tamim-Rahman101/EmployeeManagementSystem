@@ -8,8 +8,8 @@ namespace EmployeeManagementSystem.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly EmployeeService _employeeService;
-        public EmployeeController(EmployeeService employeeService)
+        private readonly IEmployeeService _employeeService;
+        public EmployeeController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
         }
@@ -95,6 +95,70 @@ namespace EmployeeManagementSystem.Controllers
                 Designations = await _employeeService.GetDesignationsByDepartmentAsync(employee.DepartmentId)
             };
             return View(vm);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Update(EmployeeCreateUpdateViewModel vm)
+        {
+            if (ModelState.IsValid)
+            {
+                var employee = new Employee
+                {
+                    Id = vm.Id!.Value,
+                    FullName = vm.FullName,
+                    Email = vm.Email,
+                    DepartmentId = vm.DepartmentId,
+                    DesignationId = vm.DesignationId,
+                    HireDate = vm.HireDate,
+                    DateOfBirth = vm.DateOfBirth,
+                    EmployeeTypeId = vm.EmployeeTypeId,
+                    Gender = vm.Gender,
+                    Salary = vm.Salary
+                };
+                await _employeeService.UpdateEmployeeAsync(employee);
+                TempData["Message"] = $"Employee with ID {employee.Id} and Name {employee.FullName} has been updated.";
+                return RedirectToAction("List");
+            }
+            vm.Departments = await _employeeService.GetDepartmentsAsync();
+            vm.EmployeeTypes = await _employeeService.GetEmployeeTypesAsync();
+            vm.Designations = vm.DepartmentId != 0 ? await _employeeService.GetDesignationsByDepartmentAsync(vm.DepartmentId) : new List<Designation>();
+            return View(vm);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (employee == null) return NotFound();
+            return View(employee);
+        }
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (employee == null) return NotFound();
+            await _employeeService.DeleteEmployeeAsync(id);
+            TempData["Message"] = $"Employee with ID {id} and Name {employee.FullName} has been deleted.";
+            return RedirectToAction("List");
+        }
+        [HttpGet]
+        public async Task<JsonResult> GetDesignations(int departmentId)
+        {
+            var designations = await _employeeService.GetDesignationsByDepartmentAsync(departmentId);
+            var result = designations.Select(d => new { id = d.Id, name = d.Name }).ToList();
+            return Json(result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Success(int id)
+        {
+            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (employee == null) return NotFound();
+            return View(employee);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (employee == null) return NotFound();
+            return View(employee);
         }
     }
 }
