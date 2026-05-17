@@ -1,7 +1,6 @@
 ﻿using EmployeeManagementSystem.Models;
 using EmployeeManagementSystem.Services;
 using EmployeeManagementSystem.ViewModels;
-using EmployeePortal.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagementSystem.Controllers
