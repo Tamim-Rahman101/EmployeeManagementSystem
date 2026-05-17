@@ -1,7 +1,7 @@
 ﻿using EmployeeManagementSystem.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace EmployeePortal.ViewModels
+namespace EmployeeManagementSystem.ViewModels
 {
     public class EmployeeCreateUpdateViewModel
     {
